@@ -2,9 +2,11 @@
 
 namespace Adeelq\ListInstalledModules\Block\Adminhtml;
 
+use Adeelq\CoreModule\Helper\Base;
 use Magento\Backend\Block\Widget\Container;
 use Magento\Backend\Block\Widget\Context;
 use Magento\Framework\Module\ModuleListInterface;
+use Throwable;
 
 class ListModulesBlock extends Container
 {
@@ -14,14 +16,21 @@ class ListModulesBlock extends Container
     private ModuleListInterface $moduleList;
 
     /**
+     * @var Base
+     */
+    private Base $baseHelper;
+
+    /**
      * @param Context $context
      * @param ModuleListInterface $moduleList
+     * @param Base $baseHelper
      * @param array $data
      */
-    public function __construct(Context $context, ModuleListInterface $moduleList, array $data = [])
+    public function __construct(Context $context, ModuleListInterface $moduleList, Base $baseHelper, array $data = [])
     {
         parent::__construct($context, $data);
         $this->moduleList = $moduleList;
+        $this->baseHelper = $baseHelper;
     }
 
     /**
@@ -29,6 +38,11 @@ class ListModulesBlock extends Container
      */
     public function getModulesList(): array
     {
-        return $this->moduleList->getAll();
+        try {
+            return $this->moduleList->getAll();
+        } catch (Throwable $e) {
+            $this->baseHelper->logError(__METHOD__, $e);
+            return [];
+        }
     }
 }
